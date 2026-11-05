@@ -5,6 +5,9 @@ export const API_ENDPOINTS = Object.freeze({
   stations: '/api/stations',
   live: '/api/stations/live',
   predictions: '/api/predictions',
+  stationWeather: (stationId) => `/api/stations/${encodeURIComponent(stationId)}/weather`,
+  stationDischarge: (stationId) => `/api/stations/${encodeURIComponent(stationId)}/discharge`,
+  stationPredictions: (stationId) => `/api/predictions/${encodeURIComponent(stationId)}`,
   station: (stationId) => `/api/stations/${encodeURIComponent(stationId)}`,
 })
 
@@ -19,4 +22,7 @@ export async function requestJson(path, { signal } = {}) {
 export const getApiStations = (options) => requestJson(API_ENDPOINTS.stations, options)
 export const getApiLiveStations = (options) => requestJson(API_ENDPOINTS.live, options)
 export const getApiPredictions = (options) => requestJson(API_ENDPOINTS.predictions, options)
+export const getApiStationWeather = (stationId, options) => requestJson(API_ENDPOINTS.stationWeather(stationId), options)
+export const getApiStationDischarge = (stationId, options) => requestJson(API_ENDPOINTS.stationDischarge(stationId), options)
+export const getApiStationPredictions = (stationId, options) => requestJson(API_ENDPOINTS.stationPredictions(stationId), options)
 export const getApiStation = (stationId, options) => requestJson(API_ENDPOINTS.station(stationId), options)

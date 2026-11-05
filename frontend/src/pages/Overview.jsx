@@ -1,17 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Activity, ArrowUpRight, CloudRain, Database, MapPin, Waves } from 'lucide-react'
 import { getOverview } from '../services/data.js'
 import { useData } from '../hooks/useData.js'
+import { useWorkspaceState } from '../hooks/WorkspaceState.jsx'
 import { EmptyState, ErrorState, KPI, Loading, Panel, Select, StationMap, StatusChip, formatValue } from '../components.jsx'
 import LandscapeSection from '../components/LandscapeSection.jsx'
 
 export default function Overview() {
   const {data,error,loading}=useData(getOverview,'overview')
-  const [stationId,setStationId]=useState('01646500')
+  const {stationId,setStationId,dateRange}=useWorkspaceState()
   const station=data?.stations.find(s=>s.id===stationId)
-  const chart=useMemo(()=>station?.discharge.slice(-365).map(d=>({...d,label:new Date(`${d.date}T00:00:00`).toLocaleDateString('en-US',{month:'short',day:'numeric'})}))||[],[station])
+  const chart=useMemo(()=>{const count=dateRange==='all'?station?.discharge.length:Number(dateRange);return station?.discharge.slice(-count).map(d=>({...d,label:new Date(`${d.date}T00:00:00`).toLocaleDateString('en-US',{month:'short',day:'numeric'})}))||[]},[station,dateRange])
   if(loading)return <Loading/>; if(error)return <ErrorState error={error}/>
   const stations=data.stations
   const latest=station?.latest
@@ -34,8 +35,8 @@ export default function Overview() {
         <div className="mini-stats"><div><span>Drainage area</span><b>{formatValue(station?.drainageArea)} <small>sq mi</small></b></div><div><span>Last record</span><b>{latest?.date||'—'}</b></div></div>
         <div className="callout"><CloudRain size={15}/><span>Prediction feed is not connected. Measurements shown are observed USGS daily means.</span></div>
       </Panel>
-      <Panel title="Discharge history" subtitle={`${station?.river} · observed daily mean (cfs)`} action={<Select value={stationId} onChange={setStationId} options={stations.map(s=>({value:s.id,label:s.id}))} label="Choose station"/>} className="chart-panel">
-        {chart.length?<ResponsiveContainer width="100%" height={250}><AreaChart data={chart} margin={{top:12,right:8,left:0,bottom:0}}><defs><linearGradient id="flowFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#267fc0" stopOpacity={.26}/><stop offset="100%" stopColor="#267fc0" stopOpacity={0}/></linearGradient></defs><CartesianGrid stroke="#e3ebf1" strokeDasharray="3 5" vertical={false}/><XAxis dataKey="label" tick={{fill:'#74899b',fontSize:11}} tickLine={false} axisLine={false} minTickGap={35}/><YAxis tick={{fill:'#74899b',fontSize:11}} tickLine={false} axisLine={false} tickFormatter={v=>`${(v/1000).toFixed(0)}k`} width={40}/><Tooltip contentStyle={{background:'#ffffff',border:'1px solid #d7e3eb',borderRadius:10,color:'#1e3c54'}} formatter={v=>[`${Number(v).toLocaleString()} cfs`,'Observed']} labelStyle={{color:'#627b90'}}/><Area type="monotone" dataKey="discharge" stroke="#267fc0" strokeWidth={2} fill="url(#flowFill)" dot={false} activeDot={{r:4,fill:'#8ed6e8'}}/></AreaChart></ResponsiveContainer>:<EmptyState>No historical discharge data available for this station.</EmptyState>}
+      <Panel title="Discharge history" subtitle={`${station?.river} · observed daily mean (cfs) · ${dateRange==='all'?'all records':`last ${dateRange} days`}`} action={<Select value={stationId} onChange={setStationId} options={stations.map(s=>({value:s.id,label:s.id}))} label="Choose station"/>} className="chart-panel">
+        {chart.length?<ResponsiveContainer width="100%" height={250}><AreaChart data={chart} margin={{top:12,right:8,left:0,bottom:0}}><defs><linearGradient id="flowFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#267fc0" stopOpacity={.26}/><stop offset="100%" stopColor="#267fc0" stopOpacity={0}/></linearGradient></defs><CartesianGrid stroke="#e3ebf1" strokeDasharray="3 5" vertical={false}/><XAxis dataKey="label" tick={{fill:'#74899b',fontSize:13}} tickLine={false} axisLine={false} minTickGap={35}/><YAxis tick={{fill:'#74899b',fontSize:13}} tickLine={false} axisLine={false} tickFormatter={v=>`${(v/1000).toFixed(0)}k`} width={40}/><Tooltip contentStyle={{background:'#ffffff',border:'1px solid #d7e3eb',borderRadius:10,color:'#1e3c54'}} formatter={v=>[`${Number(v).toLocaleString()} cfs`,'Observed']} labelStyle={{color:'#627b90'}}/><Area type="monotone" dataKey="discharge" stroke="#267fc0" strokeWidth={2} fill="url(#flowFill)" dot={false} activeDot={{r:4,fill:'#8ed6e8'}}/></AreaChart></ResponsiveContainer>:<EmptyState>No historical discharge data available for this station.</EmptyState>}
         <div className="chart-foot"><span><i className="legend-dot blue"/> Observed daily mean</span><span>Most recent 365 available records</span></div>
       </Panel>
       <Panel title="Watershed snapshot" subtitle="Selected station · catchment characteristics" action={<Link className="text-action" to="/catchment">Explore catchment <ArrowUpRight size={14}/></Link>}>

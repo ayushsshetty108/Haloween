@@ -43,6 +43,8 @@ export default defineConfig({
     proxy: {
       // Development-only public USGS proxy; production should use the Floodcast API.
       '/usgs-api': { target: 'https://api.waterdata.usgs.gov', changeOrigin: true, rewrite: path => path.replace(/^\/usgs-api/, '/ogcapi/v1') },
+      // Bounded NLDI flowline queries for the optional river network overlay.
+      '/usgs-nldi': { target: 'https://api.waterdata.usgs.gov', changeOrigin: true, rewrite: path => path.replace(/^\/usgs-nldi/, '/nldi') },
     },
   },
 })

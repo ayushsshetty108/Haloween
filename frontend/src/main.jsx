@@ -5,5 +5,6 @@ import 'leaflet/dist/leaflet.css'
 import './styles.css'
 import App from './App.jsx'
 import { LiveStationsProvider } from './hooks/LiveStationsContext.jsx'
+import { WorkspaceStateProvider } from './hooks/WorkspaceState.jsx'
 
-createRoot(document.getElementById('root')).render(<React.StrictMode><LiveStationsProvider><BrowserRouter><App /></BrowserRouter></LiveStationsProvider></React.StrictMode>)
+createRoot(document.getElementById('root')).render(<React.StrictMode><WorkspaceStateProvider><LiveStationsProvider><BrowserRouter><App /></BrowserRouter></LiveStationsProvider></WorkspaceStateProvider></React.StrictMode>)

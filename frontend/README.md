@@ -1,24 +1,40 @@
-# Floodcast frontend
+# FLOODCAST frontend
 
-Run `npm install`, then `npm run dev` from this directory.
+Run `npm install`, then `npm run dev` from this directory. `npm run build` creates the production bundle.
 
-The development server exposes the existing project CSV files through read-only `/workspace-data/*` endpoints. It does not copy source datasets into this directory. The adapter is in `src/services/data.js`; replace its local source calls with the documented `/api/*` routes when the FastAPI service is ready.
-
-Observed discharge, station metadata, NASA POWER weather, processed catchment values, PRISM normals, and Annual NLCD summaries are read from the existing project outputs. Forecasts and model scores remain empty until validated output files or API responses exist. Catchment fields with blank or rejected source results are shown as unavailable.
+This frontend reuses project station metadata, historical station observations, and processed catchment files through the existing read-only `/workspace-data/*` development routes. Source datasets are not copied or edited. Fields are shown as unavailable when the source is blank or rejected.
 
 ## Live river monitoring
 
-The monitoring map uses React Leaflet, Leaflet, and OpenStreetMap tiles. It requests the modern USGS Water Data API `latest-continuous` collection for `USGS-01646500`, `USGS-02087500`, `USGS-07010000`, and `USGS-08158000`, with parameter codes `00060` (discharge) and `00065` (gage height). The development proxy in `vite.config.js` avoids browser CORS issues and does not use the deprecated WaterServices endpoints. Production should route live requests through the Floodcast backend.
+The Monitoring page uses React Leaflet and OpenStreetMap street tiles, with Esri World Imagery satellite and Esri Topographic basemaps. It includes the four supported USGS stations, station autocomplete, full-screen map, the project's verified watershed boundaries, and bounded river reaches from USGS Network Linked Data Index (NLDI). Basin outlines are shown only when a matching project boundary is available; the rainfall circle is explicitly a selected-coordinate model estimate rather than a basin-wide surface.
 
-The live data service is `src/services/liveStations.js`; the app-level polling/cache is `src/hooks/LiveStationsContext.jsx`. It shares one request across the map and monitoring panel, refreshes every five minutes, and keeps the last successful snapshot visible if an update fails. Only continuous USGS measurements appear in the live panel. Existing CSV daily means remain labeled historical. Predictions are displayed only when returned by the predictions API. Risk colors are used only when a station classification includes a threshold source; otherwise markers and labels stay neutral/unavailable.
+In development, `src/services/liveStations.js` requests the USGS Water Data API `latest-continuous` collection for `USGS-01646500`, `USGS-02087500`, `USGS-07010000`, and `USGS-08158000`, for discharge (`00060`) and gage height (`00065`). Vite proxies the request to avoid browser CORS issues. The app shares and caches one live snapshot for 4.5 minutes and refreshes at five-minute intervals. A failed refresh leaves the last successful snapshot visible with its original observation timestamp. Historical daily means stay labeled as historical.
 
-The backend is not implemented in this project yet. `src/services/api.js` defines the frontend adapter and expected routes:
+`src/services/openMeteo.js` requests a bounded seven-day past/seven-day forecast window for only the selected station coordinate. Responses are cached per station for two hours. Temperature, precipitation/rainfall, soil-moisture depth, snowfall and snow depth remain model estimates with units, time labels and point/grid provenance. The UI does not treat these values as basin averages. Any snowmelt description is explicitly derived from returned weather values; it is not a direct measurement.
 
-| Route | Expected response |
+## Backend adapter
+
+The backend is not present in this project. `src/services/api.js` contains the reusable frontend adapter; set `VITE_API_BASE_URL` when the API is hosted on another origin.
+
+| Route | Frontend use |
 | --- | --- |
-| `GET /api/stations` | Station metadata array or `{ "stations": [...] }` |
-| `GET /api/stations/live` | `{ "stations": [{ "station_id": "01646500", "streamflow": { "value": 123, "time": "ISO-8601", "unit": "ft3/s", "approval_status": "approved", "parameter_code": "00060" }, "gauge_height": { "value": 4.2, "time": "ISO-8601", "unit": "ft", "approval_status": "provisional", "parameter_code": "00065" }, "risk_classification": "moderate", "risk_threshold_source": "..." }], "updated_at": "ISO-8601" }` |
-| `GET /api/predictions` | `{ "predictions": [{ "station_id": "01646500", "predicted_discharge": 123, "unit": "ft3/s", "valid_time": "ISO-8601" }] }` |
-| `GET /api/stations/{station_id}` | Station metadata and available observations for one station |
+| `GET /api/stations` | Station metadata/profile and existing project records |
+| `GET /api/stations/live` | Latest station measurements, approval metadata, validated risk classification/threshold, rate of rise, and any alert flags |
+| `GET /api/stations/{station_id}` | Station-specific metadata and available observations |
+| `GET /api/stations/{station_id}/discharge` | Station discharge series adapter |
+| `GET /api/stations/{station_id}/weather` | Station weather adapter |
+| `GET /api/predictions` | Prediction series, grouped by station |
+| `GET /api/predictions/{station_id}` | Station prediction adapter |
 
-Unavailable values should be omitted or `null`. The development USGS adapter is a demonstration fallback only; once backend routes are deployed, set `VITE_API_BASE_URL` if they are hosted on a different origin.
+The live response can use `{ "stations": [...] }` and include `station_id`, `streamflow` and `gauge_height` objects with `value`, `time`, `unit`, `approval_status`, and `parameter_code`. Risk must include both a classification and its threshold source to be displayed. Prediction series should include station ID, generated time, valid time, predicted discharge, unit and model metadata when available. Calibrated uncertainty and feature explanations are displayed only when present in the model response.
+
+The development adapter falls back to public USGS observations if the Floodcast backend is unavailable. Production requires the backend live route; the direct public feed is intentionally development-only. Alert center entries are derived from current returned data and backend alert flags. Persistent alert history, calibrated model evaluation, and what-if simulation remain unavailable until their backend/model endpoints return those outputs. No flood thresholds, model predictions, or missing measurements are synthesized.
+
+## Data sources
+
+- USGS Water Data API for continuous discharge and gage-height observations.
+- USGS NLDI for bounded river network navigation.
+- Open-Meteo forecast model for selected-coordinate environmental estimates.
+- Existing project files for historical measurements, processed catchment attributes, and verified watershed boundaries.
+
+Sources, timestamps, units and observation/prediction labels are shown where the source provides them. USGS observations can be delayed or provisional; the displayed timestamp and approval state should be checked before operational use.

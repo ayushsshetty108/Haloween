@@ -29,7 +29,7 @@ function measurement(properties) {
 const later = (next, current) => !current || (Date.parse(next?.time || '') || 0) > (Date.parse(current.time || '') || 0)
 
 function normalizeStationFeatureRows(collection) {
-  const stations = Object.fromEntries(USGS_STATION_IDS.map(id => [id, { stationId: id, streamflow: null, gaugeHeight: null, risk: null, prediction: null }]))
+  const stations = Object.fromEntries(USGS_STATION_IDS.map(id => [id, { stationId: id, streamflow: null, gaugeHeight: null, risk: null, prediction: null, predictions: [] }]))
   for (const feature of collection?.features || []) {
     const properties = feature.properties || feature
     const stationId = String(properties.monitoring_location_id ?? properties.monitoringLocationId ?? '').replace(/^USGS-/, '')
@@ -52,12 +52,22 @@ function normalizeBackendRows(payload) {
     const gaugeHeight = raw.gauge_height || raw.gaugeHeight || null
     const riskClass = raw.risk_classification ?? raw.risk?.classification ?? null
     const thresholdSource = raw.risk_threshold_source ?? raw.risk?.threshold_source ?? null
+    const thresholdValue = Number(raw.risk_threshold_value ?? raw.risk?.threshold_value)
+    const rateValue = raw.rate_of_rise ?? raw.rateOfRise ?? null
+    const rawPredictions = Array.isArray(raw.predictions) ? raw.predictions : []
     return {
       stationId,
       streamflow: streamflow ? measurement({ ...streamflow, parameter_code: streamflow.parameter_code || '00060' }) : null,
       gaugeHeight: gaugeHeight ? measurement({ ...gaugeHeight, parameter_code: gaugeHeight.parameter_code || '00065' }) : null,
-      risk: riskClass && thresholdSource ? { classification: String(riskClass).toLowerCase(), thresholdSource } : null,
+      risk: riskClass && thresholdSource ? { classification: String(riskClass).toLowerCase(), thresholdSource, thresholdValue: Number.isFinite(thresholdValue) ? thresholdValue : null, thresholdUnit: raw.risk?.threshold_unit || raw.risk_threshold_unit || null } : null,
+      rateOfRise: typeof rateValue === 'object' ? rateValue.value ?? null : rateValue,
+      rateOfRiseUnit: raw.rate_of_rise_unit ?? raw.rateOfRiseUnit ?? (typeof rateValue === 'object' ? rateValue.unit : null),
+      rateOfRiseWindow: raw.rate_of_rise_window ?? raw.rateOfRiseWindow ?? (typeof rateValue === 'object' ? rateValue.window : null),
+      rapidRiseAlert: raw.rapid_rise_alert === true || raw.alerts?.some?.(alert => alert.type === 'rapid_rise' && alert.active === true),
+      unusualObservation: raw.unusual_observation === true || raw.anomaly?.active === true,
+      alerts: Array.isArray(raw.alerts) ? raw.alerts : [],
       prediction: raw.prediction || null,
+      predictions: rawPredictions,
     }
   })
 }
@@ -85,8 +95,17 @@ export async function fetchLiveStationSnapshot({ signal, force = false } = {}) {
         getApiPredictions({ signal }).then(value => ({ value })).catch(() => ({ value: null })),
       ])
       const predictionRows = Array.isArray(predictionsResult.value) ? predictionsResult.value : predictionsResult.value?.predictions || []
-      const predictionById = new Map(predictionRows.map(row => [String(row.station_id ?? row.stationId ?? '').replace(/^USGS-/, ''), row]))
-      for (const station of stations) station.prediction ||= predictionById.get(station.stationId) || null
+      const predictionById = new Map()
+      for (const row of predictionRows) {
+        const id = String(row.station_id ?? row.stationId ?? '').replace(/^USGS-/, '')
+        if (!predictionById.has(id)) predictionById.set(id, [])
+        predictionById.get(id).push(row)
+      }
+      for (const station of stations) {
+        const series = predictionById.get(station.stationId) || station.predictions || []
+        station.predictions = series
+        station.prediction ||= [...series].sort((a, b) => String(a.generated_at || a.prediction_time || a.valid_time || '').localeCompare(String(b.generated_at || b.prediction_time || b.valid_time || ''))).at(-1) || null
+      }
       const snapshot = { stations, source: 'Floodcast backend', backendConnected: true, updatedAt: payload.updated_at || payload.updatedAt || new Date().toISOString(), fetchedAt: new Date().toISOString() }
       liveCache = { snapshot, cachedAt: Date.now() }
       return snapshot
