@@ -1,0 +1,5 @@
+.env
+.venv/
+.codex-gis-packages/
+__pycache__/
+*.pyc

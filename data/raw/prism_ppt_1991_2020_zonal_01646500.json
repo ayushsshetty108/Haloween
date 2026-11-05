@@ -1,0 +1,14 @@
+{
+  "station_id": "01646500",
+  "mean_annual_precipitation_mm": 1080.8618200253566,
+  "weighted_valid_area_sq_km": 29944.80054895286,
+  "valid_grid_cells_intersecting": 1976,
+  "grid_resolution": "2.5 arc-minute (~4 km)",
+  "grid_crs": "OGC:CRS83",
+  "period": "1991-2020",
+  "dataset_version": "M3; PRISM dataset type an81/r2103h; created 2021-10-29",
+  "weighting": "Exact area of each valid PRISM grid-cell polygon intersecting the basin, calculated after transformation to EPSG:5070; cells are area weighted by fractional overlap.",
+  "boundary_file": "usgs_nldi_validated_basin_01646500.geojson",
+  "source_raster_url": "https://prism.oregonstate.edu/request/normals/1991-2020_M3/4km/ppt/PRISM_ppt_30yr_normal_4kmM3_annual_bil.zip",
+  "retrieved_date": "2026-11-05"
+}

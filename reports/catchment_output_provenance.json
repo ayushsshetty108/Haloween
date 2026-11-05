@@ -1,0 +1,92 @@
+{
+  "stations": {
+    "01646500": {
+      "station_id": "01646500",
+      "boundary_file": "usgs_nldi_validated_basin_01646500.geojson",
+      "boundary_area_sq_mi": 11561.752133028838,
+      "boundary_nwis_area_difference_pct": 0.015156860111057232,
+      "boundary_nhdplus_area_difference_pct": -0.007682682809185316,
+      "dem_file": "usgs_3dep_30m_corrected_01646500.json",
+      "dem_tile_count": 5,
+      "dem_elevation_complete": true,
+      "dem_slope_complete": true,
+      "dem_slope_mean_raw": 1146.3532765409411,
+      "dem_slope_max_raw": 2280406.75,
+      "dem_slope_median_raw": 0,
+      "nlcd_file": "annual_nlcd_2024_zonal_01646500.json",
+      "nlcd_complete": true,
+      "nlcd_valid_land_pixels": 33275715,
+      "nlcd_valid_impervious_pixels": 33275715,
+      "prism_file": "prism_ppt_1991_2020_zonal_01646500.json",
+      "prism_cells": 1976
+    },
+    "02087500": {
+      "station_id": "02087500",
+      "boundary_file": "usgs_nldi_validated_basin_02087500.geojson",
+      "boundary_area_sq_mi": 1153.4352320228186,
+      "boundary_nwis_area_difference_pct": 0.298715828071181,
+      "boundary_nhdplus_area_difference_pct": -0.028580826981576032,
+      "dem_file": "usgs_3dep_30m_corrected_02087500.json",
+      "dem_tile_count": 2,
+      "dem_elevation_complete": true,
+      "dem_slope_complete": true,
+      "dem_slope_mean_raw": 1400.6464873078246,
+      "dem_slope_max_raw": 2074791.25,
+      "dem_slope_median_raw": 3.9554339180682216,
+      "nlcd_file": "annual_nlcd_2024_zonal_02087500_retry.json",
+      "nlcd_complete": true,
+      "nlcd_valid_land_pixels": 3319336,
+      "nlcd_valid_impervious_pixels": 3319336,
+      "prism_file": "prism_ppt_1991_2020_zonal_02087500.json",
+      "prism_cells": 217
+    },
+    "07010000": {
+      "station_id": "07010000",
+      "boundary_file": "usgs_nldi_validated_basin_07010000.geojson",
+      "boundary_area_sq_mi": 667297.0927415143,
+      "boundary_nwis_area_difference_pct": -4.261536192035248,
+      "boundary_nhdplus_area_difference_pct": -0.004082468474519986,
+      "dem_file": null,
+      "nlcd_file": "annual_nlcd_2024_zonal_07010000_retry.json",
+      "nlcd_complete": true,
+      "nlcd_valid_land_pixels": 1899526594,
+      "nlcd_valid_impervious_pixels": 1899526594,
+      "prism_file": "prism_ppt_1991_2020_zonal_07010000.json",
+      "prism_cells": 113136
+    },
+    "08158000": {
+      "station_id": "08158000",
+      "boundary_file": "usgs_nldi_validated_basin_08158000.geojson",
+      "boundary_area_sq_mi": 34708.05098079946,
+      "boundary_nwis_area_difference_pct": -11.02553005511687,
+      "boundary_nhdplus_area_difference_pct": -0.006489959870689201,
+      "dem_file": null,
+      "nlcd_file": "annual_nlcd_2024_zonal_08158000.json",
+      "nlcd_complete": true,
+      "nlcd_valid_land_pixels": 99881078,
+      "nlcd_valid_impervious_pixels": 99881078,
+      "prism_file": "prism_ppt_1991_2020_zonal_08158000.json",
+      "prism_cells": 5302
+    }
+  },
+  "missing": {
+    "01646500": [
+      "mean_slope_pct: 3DEP percent-rise output failed quality screening (incomplete tiles or implausible extreme values; no slope statistic published)",
+      "wetland_cover_pct: NWI feature pagination/clip was not completed for all basin features; partial raw pages are not used"
+    ],
+    "02087500": [
+      "mean_slope_pct: 3DEP percent-rise output failed quality screening (incomplete tiles or implausible extreme values; no slope statistic published)",
+      "wetland_cover_pct: NWI feature pagination/clip was not completed for all basin features; partial raw pages are not used"
+    ],
+    "07010000": [
+      "mean/minimum/maximum elevation: completed 3DEP basin-tile result not available",
+      "mean_slope_pct: completed 3DEP basin-tile result not available",
+      "wetland_cover_pct: NWI feature pagination/clip was not completed for all basin features; partial raw pages are not used"
+    ],
+    "08158000": [
+      "mean/minimum/maximum elevation: completed 3DEP basin-tile result not available",
+      "mean_slope_pct: completed 3DEP basin-tile result not available",
+      "wetland_cover_pct: NWI feature pagination/clip was not completed for all basin features; partial raw pages are not used"
+    ]
+  }
+}

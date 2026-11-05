@@ -1,0 +1,3 @@
+station_id,complete,tile_count,impervious_cover_pct,forest_cover_pct,urban_cover_pct,valid_land_cover_pixels,valid_impervious_pixels,source_file
+02087500,True,1,11.01093652465415,44.528273124504416,34.565708322387366,3319336,3319336,annual_nlcd_2024_zonal_02087500_retry.json
+07010000,True,81,1.4706360904994453,10.55305130410825,5.367789759936365,1899526594,1899526594,annual_nlcd_2024_zonal_07010000_retry.json

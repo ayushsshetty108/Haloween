@@ -1,0 +1,35 @@
+FLOODCAST DATA QUALITY AND MODEL-READINESS SUMMARY
+====================================================
+
+Source files were read only; no original raw or processed source CSV was modified.
+NASA POWER parsing: skip the observed 14 metadata lines; data columns are YEAR, DOY, T2M_MAX, T2M_MIN, RH2M, GWETTOP, GWETROOT, PRECTOTCORR.
+NASA mapping: PRECTOTCORR -> precipitation_mm (mm/day); T2M_MAX/T2M_MIN -> temp_max_c/temp_min_c; RH2M -> relative_humidity_pct; GWETTOP/GWETROOT -> surface_soil_wetness/soil_moisture.
+NASA -999 sentinels were treated as missing in memory only. No sentinel or discharge values were imputed, clipped, or dropped.
+
+NASA rows: 23376 across 4 stations; date range 2010-01-01 to 2025-12-31.
+USGS labeled rows: 23375 across 4 stations; target is discharge_cfs, source units ft^3/s.
+USGS duplicate station-date keys: 0.
+NASA duplicate station-date keys: 0.
+Rows without matching daily weather: 0; rows without a static station row: 0.
+USGS rows by station: 01646500=5844, 02087500=5844, 07010000=5844, 08158000=5843
+NASA rows by station: 01646500=5844, 02087500=5844, 07010000=5844, 08158000=5844
+
+Catchment feature sources are the existing processed catchment table (USGS NWIS drainage area, USGS 3DEP elevation/slope, NLCD cover, and PRISM normals; see reports/catchment_data_dictionary.csv). Mean elevation was converted from meters to feet (1 m = 3.280839895 ft). No polygon coordinates were exported.
+Catchment features: drainage_area_sqmi missing=0/4, contributing_drainage_area_sqmi missing=3/4, mean_elevation_ft missing=2/4, slope_pct missing=4/4, forest_cover_pct missing=0/4, impervious_pct missing=0/4, urban_cover_pct missing=0/4, wetland_pct missing=4/4, soil_group_a_pct missing=4/4, soil_group_b_pct missing=4/4, soil_group_c_pct missing=4/4, soil_group_d_pct missing=4/4, available_water_capacity missing=4/4, saturated_hydraulic_conductivity missing=4/4, mean_annual_precipitation_mm missing=0/4
+Missing required predictors (all missing or unavailable): slope_pct
+
+Official split availability:
+train.csv: NOT FOUND
+test.csv: NOT FOUND
+Because the official splits are absent, model_training.csv and model_test.csv were NOT created. No split, test order, or test rows were fabricated.
+A daily feature/target join was validated in memory only; no target-derived predictors were added. Full official train/test row-preservation, test-order, and target-only-in-training checks cannot be performed without those files.
+
+MODEL TRAINING STATUS: NOT READY from this workspace. The official train/test files are missing, and slope_pct is unavailable for all stations; soil and wetland characteristics are also missing in the existing static table. Other missing static values remain NaN and should not be filled with fabricated values.
+
+LATEST LOCAL PREPARATION STATUS (2026-11-05)
+==========================================
+Official competition file discovery searched the FLOODCAST project, the Desktop workspace, Downloads, and the local user profile for train.csv/test.csv and similarly named split files. No competition splits were found. Matches under NumPy package tests are unrelated library fixtures. Therefore no model_training.csv or model_test.csv was created, and the exploratory USGS/NASA records were not substituted for the official competition data.
+
+Read-only validation of the existing files confirmed: data/final/catchment_features.csv has 4 unique requested stations and 16 columns; data/processed/catchment_characteristics.csv has 4 unique requested stations and the required 18 columns; data/processed/usgs_daily_mean.csv has 23,375 records with no duplicate station-date keys or missing discharge; and all 23,375 discharge rows match NASA POWER dates across 23,376 weather records. These checks validate existing project data only, not competition split row order or train/test isolation.
+
+The live 3DEP request run was stopped before any more geographical API work. It had completed the 07010000 elevation tile phase but was in the optional slope phase before the collector wrote a station-level JSON result; consequently no new 07010000 elevation summary was persisted. The previously saved 01646500 and 02087500 results remain unchanged. The 08158000 run did not begin. Existing static-feature gaps remain: slope, soil and wetland fields are blank, and elevation is absent for 07010000 and 08158000.
