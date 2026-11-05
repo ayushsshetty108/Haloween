@@ -1,5 +1,5 @@
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
-  theme: { extend: { colors: { forest: '#071C18', panel: '#0D2922', mint: '#22C58B', water: '#38BDF8' }, fontFamily: { sans: ['DM Sans', 'sans-serif'], display: ['Manrope', 'sans-serif'] } } },
+  theme: { extend: { colors: { canvas: '#F4F7FB', surface: '#FFFFFF', ink: '#172D43', primary: '#2479C5', water: '#16A9C5' }, fontFamily: { sans: ['DM Sans', 'sans-serif'], display: ['Manrope', 'sans-serif'] } } },
   plugins: [],
 }

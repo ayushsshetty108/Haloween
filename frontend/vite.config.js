@@ -36,4 +36,13 @@ function workspaceData() {
   }
 }
 
-export default defineConfig({ plugins: [react(), workspaceData()], server: { host: '0.0.0.0' } })
+export default defineConfig({
+  plugins: [react(), workspaceData()],
+  server: {
+    host: '0.0.0.0',
+    proxy: {
+      // Development-only public USGS proxy; production should use the Floodcast API.
+      '/usgs-api': { target: 'https://api.waterdata.usgs.gov', changeOrigin: true, rewrite: path => path.replace(/^\/usgs-api/, '/ogcapi/v1') },
+    },
+  },
+})
