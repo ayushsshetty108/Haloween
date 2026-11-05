@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Activity, ArrowUpRight, CloudRain, Database, MapPin, Waves } from 'lucide-react'
 import { getOverview } from '../services/data.js'
 import { useData } from '../hooks/useData.js'
-import { EmptyState, ErrorState, KPI, Loading, PageHeader, Panel, Select, StationMap, StatusChip, formatValue } from '../components.jsx'
+import { EmptyState, ErrorState, KPI, Loading, Panel, Select, StationMap, StatusChip, formatValue } from '../components.jsx'
+import LandscapeSection from '../components/LandscapeSection.jsx'
 
 export default function Overview() {
   const {data,error,loading}=useData(getOverview,'overview')
@@ -14,7 +16,10 @@ export default function Overview() {
   const stations=data.stations
   const latest=station?.latest
   return <>
-    <PageHeader eyebrow="RIVER NETWORK · UNITED STATES" title="See your rivers in context." subtitle="Observed streamflow, watershed conditions, and weather across four USGS monitoring locations." actions={<StatusChip tone="green">4 MONITORED STATIONS</StatusChip>}/>
+    <section className="overview-hero">
+      <div className="overview-hero-copy"><span className="hero-kicker"><i/> USGS RIVER OBSERVATION NETWORK</span><h1>Water intelligence<br/><em>in a wider view.</em></h1><p>Follow observed river flow alongside the landscapes, catchments, and weather that shape it.</p><div className="hero-actions"><Link className="hero-primary" to="/monitoring">Explore stations <ArrowUpRight size={16}/></Link><Link className="hero-secondary" to="/catchment">Explore catchments</Link></div><div className="hero-stat-row"><div><b>{stations.length}</b><span>USGS stations</span></div><div><b>{formatValue(data.totalRecords)}</b><span>daily flow records</span></div><div><b>{stations.reduce((latest,s)=>!latest||s.latest?.date>latest?s.latest?.date:latest,'')||'—'}</b><span>latest record date</span></div></div></div>
+      <div className="overview-hero-image"><img src="/images/reservoir-morning.jpg" alt="Aerial view of a forested reservoir at morning"/><div className="hero-image-shade"/><span className="hero-image-label"><i/> WATERSHED LANDSCAPE <small>Illustrative image</small></span><div className="hero-image-caption"><span>Water systems,</span><b>seen from above.</b></div></div>
+    </section>
     <div className="kpi-grid">
       <KPI label="Monitoring stations" value={stations.length} icon={MapPin} note="USGS daily streamflow sites"/>
       <KPI label="Historical records" value={formatValue(data.totalRecords)} icon={Database} tone="blue" note="Daily mean discharge · all sites"/>
@@ -41,6 +46,7 @@ export default function Overview() {
         <div className="network-list">{stations.map((s,i)=><button key={s.id} onClick={()=>setStationId(s.id)} className={`network-row ${s.id===stationId?'chosen':''}`}><span className={`network-marker marker-${i%2}`}/><span className="network-name"><b>{s.river}</b><small>{s.id} · {s.state}</small></span><span className="network-flow">{s.latest?`${formatValue(s.latest.discharge)} cfs`:'—'}</span><ArrowUpRight size={14}/></button>)}</div>
       </Panel>
     </div>
+    <LandscapeSection />
   </>
 }
 function Snapshot({label,value,unit}) { return <div className="snapshot-row"><span>{label}</span><b>{value==null?<em>Unavailable</em>:`${formatValue(value,1)} ${unit}`}</b></div> }
